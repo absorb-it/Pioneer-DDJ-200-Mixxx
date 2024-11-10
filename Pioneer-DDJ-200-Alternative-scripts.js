@@ -85,7 +85,7 @@ DDJ200.updatePlayModeLed = function(group) {
     else if (DDJ200.cuePlay[vDeckNo]) {
         if (DDJ200.playModeBlinkTimer[vDeckNo] === 0) {
             var playOn = true;
-            DDJ200.playModeBlinkTimer[vDeckNo] = engine.beginTimer(250, function () {
+            DDJ200.playModeBlinkTimer[vDeckNo] = engine.beginTimer(500, function () {
                 midi.sendShortMsg(0x90 + script.deckFromGroup(group) - 1, 0x0B, 0x7F * (playOn = !playOn));
             });
         }
@@ -355,14 +355,18 @@ DDJ200.cueDefault = function(channel, control, value, status, group) {
         if (!DDJ200.vDeck[vDeckNo]["jogEnabled"]) {  // if jog top is touched
             engine.setValue(vgroup, "cue_set", true);
         } else {
-            engine.setValue(vgroup, "cue_gotoandplay", true);
+            engine.setValue(vgroup, "cue_preview", false);
+            engine.setValue(vgroup, "cue_preview", true);
         }
         var cueSet = (engine.getValue(vgroup, "cue_point") !== -1);
         midi.sendShortMsg(status, 0x0C, 0x7F * cueSet);      // set cue LED
         DDJ200.updatePlayModeLed(group);
     } else if (DDJ200.cuePlay[vDeckNo]) {
-        if (DDJ200.vDeck[vDeckNo]["jogEnabled"] && DDJ200.cuePlay[vDeckNo] == 1 && !DDJ200.realPlay[vDeckNo]) {  // if jog top is not touched
-            engine.setValue(vgroup, "play", false);
+        if (DDJ200.vDeck[vDeckNo]["jogEnabled"] && ! DDJ200.realPlay[vDeckNo]) {
+            engine.setValue(vgroup, "cue_preview", false);
+            if (DDJ200.cuePlay[vDeckNo] == 1) {
+                engine.setValue(vgroup, "play", false);
+            }
         }
         DDJ200.cuePlay[vDeckNo]--;
         DDJ200.updatePlayModeLed(group);
