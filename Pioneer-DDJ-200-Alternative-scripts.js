@@ -3,7 +3,9 @@ var DDJ200 = {
     vDeckNo: [0, 1, 2],
     vDeck: {},
     shiftPressed: {left: false, right: false},
-    jogCounter: 0
+    jogCounter: 0,
+    padModeIndex: 0,
+    padModes: ['hotcue', 'loop', 'effects']
 };
 
 DDJ200.init = function() {
@@ -24,30 +26,19 @@ DDJ200.init = function() {
             DDJ200.updateDeckLeds(vgroup);
         });
 
-        // run switchPlayLED after play/pause track to set LEDs accordingly
+        // run updateDeckLeds after play/pause track to set LEDs accordingly
         engine.makeConnection(vgroup, "play", function(ch, vgroup) {
-            var vDeckNo = script.deckFromGroup(vgroup);
-            var d = (vDeckNo % 2) ? 0 : 1;
-            DDJ200.switchPlayLED(d, ch);
+            DDJ200.updateDeckLeds(vgroup);
         });
 
-        // run switchSyncLED after sync toggle to set LEDs accordingly
+        // run updateDeckLeds after sync toogle to set LEDs accordingly
         engine.makeConnection(vgroup, "sync_enabled", function(ch, vgroup) {
-            var vDeckNo = script.deckFromGroup(vgroup);
-            var d = (vDeckNo % 2) ? 0 : 1;
-            DDJ200.switchSyncLED(d, ch);
+            DDJ200.updateDeckLeds(vgroup);
         });
+		
+        DDJ200.updatePadModeLed()
 
-        // listen to changes on hotcues
-        for (var j = 1; j <= 8; j++) {
-            // run switchPadLED after every hotcue update
-            engine.makeConnection(vgroup, "hotcue_" + j + "_enabled", function(ch, vgroup, control) {
-                var pad = Number(control.split("_")[1]);
-                var vDeckNo = script.deckFromGroup(vgroup);
-                var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
-                DDJ200.switchPadLED(d, pad, ch);
-            });
-        }
+        DDJ200.listemHotcues(vgroup)
 
         // set Pioneer CDJ cue mode for all decks
         engine.setValue(vgroup, "cue_cdj", true);
@@ -56,12 +47,50 @@ DDJ200.init = function() {
     DDJ200.LEDsOff();
 
     // start with focus on library for selecting tracks (delay seems required)
-    engine.beginTimer(500, () => {
+    engine.beginTimer(500, function() {
         engine.setValue("[Library]", "MoveFocus", 1);
     }, true);
-
+    
     // query the controller for current control positions on startup
     midi.sendSysexMsg([0xF0, 0x00, 0x40, 0x05, 0x00, 0x00, 0x02, 0x0a, 0x00, 0x03, 0x01, 0xf7], 12);
+};
+
+DDJ200.changePadMode = function(channel, control, value) {
+    if (value) { // only if button pressed, not releases, i.e. value === 0
+        DDJ200.padModeIndex = (DDJ200.padModeIndex + 1) % DDJ200.padModes.length;
+        DDJ200.updatePadModeLed();
+        DDJ200.switchAllChanelsLEDs();
+    }
+};
+
+DDJ200.switchAllChanelsLEDs = function() {
+    for (var i = 1; i <= 2; i++) {
+        DDJ200.switchPadLEDs(i);
+    }
+};
+
+DDJ200.updatePadModeLed = function() {
+    if (DDJ200.padModeBlinkTimer) {
+        engine.stopTimer(DDJ200.padModeBlinkTimer);
+        DDJ200.padModeBlinkTimer = undefined;
+    }
+    if (DDJ200.padModeIndex === 2) {
+        var tunedOn = true;
+        DDJ200.padModeBlinkTimer = engine.beginTimer(250, function () {
+            midi.sendShortMsg(0x96, 0x59, 0x7F * (tunedOn = !tunedOn));
+        });
+    } else {
+        midi.sendShortMsg(0x96, 0x59, 0x7F * (DDJ200.padModeIndex === 1));
+    }
+};
+
+DDJ200.listemHotcues = function(vgroup) {
+    for (var i = 1; i <= 8; i++) {
+        // run updateDeckLeds after every hotcue update
+        engine.makeConnection(vgroup, "hotcue_" + i + "_enabled", function(ch, vgroup) {
+            DDJ200.updateDeckLeds(vgroup);
+        });
+    }
 };
 
 DDJ200.shutdown = function() {
@@ -152,11 +181,11 @@ DDJ200.touch = function(channel, control, value, status, group) {
         var alpha = 1.0 / 8;
         engine.scratchEnable(vDeckNo, 128, 33 + 1 / 3, alpha, alpha / 32);
         // disable jog not to prevent track alignment
-        DDJ200.vDeck[vDeckNo].jogEnabled = false;
+        DDJ200.vDeck[vDeckNo]["jogEnabled"] = false;
     } else {
         // enable jog after 900 ms again
-        engine.beginTimer(900, () => {
-            DDJ200.vDeck[vDeckNo].jogEnabled = true;
+        engine.beginTimer(900, function() {
+            DDJ200.vDeck[vDeckNo]["jogEnabled"] = true;
         }, true);
         // disable scratch
         engine.scratchDisable(vDeckNo);
@@ -179,8 +208,8 @@ DDJ200.seek = function(channel, control, value, status, group) {
 DDJ200.headmix = function(channel, control, value) {
     // toggle headMix knob between -1 to 1
     if (value) { // do nothing if button is released, i.e. value === 0
-        var masterMixEnabled = (engine.getValue("[Master]", "headMix") > 0);
-        engine.setValue("[Master]", "headMix", masterMixEnabled ? -1 : 1);
+        var masterMixEnabled = (engine.getValue("[Master]", "headMix") >= 0);
+        engine.setValue("[Master]", "headMix", masterMixEnabled ? -1 : 0);
         midi.sendShortMsg(0x96, 0x63, masterMixEnabled ? 0 : 0x7F); // set LED
     }
 };
@@ -233,7 +262,7 @@ DDJ200.rateMSB = function(channel, control, value, status, group) {
 DDJ200.rateLSB = function(channel, control, value, status, group) {
     var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
     var vgroup = "[Channel" + vDeckNo + "]";
-    // calculate rate value from its most and least significant bytes
+    // calculte rate value from its most and least significant bytes
     var rateMSB = DDJ200.vDeck[vDeckNo]["rateMSB"];
     var rate = 1 - (((rateMSB << 7) + value) / 0x1FFF);
     engine.setValue(vgroup, "rate", rate);
@@ -248,7 +277,7 @@ DDJ200.volumeMSB = function(channel, control, value, status, group) {
 DDJ200.volumeLSB = function(channel, control, value, status, group) {
     var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
     var vgroup = "[Channel" + vDeckNo + "]";
-    // calculate volume value from its most and least significant bytes
+    // calculte volume value from its most and least significant bytes
     var volMSB = DDJ200.vDeck[vDeckNo]["volMSB"];
     var vol = ((volMSB << 7) + value) / 0x3FFF;
     //var vol = ((volMSB << 7) + value); // use for linear correction
@@ -331,6 +360,74 @@ DDJ200.hotcueNClear = function(channel, control, value, status, group) {
     }
 };
 
+DDJ200.repeatNActive =  function(channel, control, value, status, group) {
+    if (value) { // only if button pressed, not releases, i.e. value === 0
+        var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
+        var vgroup = "[Channel" + vDeckNo + "]";
+        var loopSize = getLoopSizeByIndex(control);
+        var isBeatlooprollActivate = engine.getValue(vgroup, "beatlooproll_activate");
+        var currentBeatLoopSize = engine.getValue(vgroup, "beatloop_size");
+        
+        if (currentBeatLoopSize === loopSize) {
+            engine.setValue(vgroup, "beatloop_size", 0);
+            engine.setValue(vgroup, "beatlooproll_activate", false);
+            engine.setValue(vgroup, "beatloop_activate", false);
+        } else {
+            engine.setValue(vgroup, "beatloop_size", loopSize);
+            if (!isBeatlooprollActivate) {
+                engine.setValue(vgroup, "beatloop_activate", true);
+            }
+        }
+
+        DDJ200.switchPadLEDs(vDeckNo)
+    }
+};
+
+DDJ200.rollRepeatN = function(channel, control, value, status, group) {
+    if (value) { // only if button pressed, not releases, i.e. value === 0
+        var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
+        var vgroup = "[Channel" + vDeckNo + "]";
+        var isBeatloopActivate = engine.getValue(vgroup, "beatloop_activate");
+        if (!isBeatloopActivate) {
+            var loopSize = getLoopSizeByIndex(control);
+            engine.setValue(vgroup, "beatloop_size", loopSize);
+            engine.setValue(vgroup, "beatlooproll_activate", true);
+            DDJ200.switchPadLEDs(vDeckNo);
+        }
+    }
+};
+
+DDJ200.effectNActive = function(channel, control, value, status, group) {         // d = deckNo - 1
+    var effectCol = (control + 1) % 4
+    var effectRow = Math.floor(control/4)
+    if (effectCol) {
+        var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)] + effectRow * 2;
+        var d = (vDeckNo % 2) ? 0 : 1;
+        var effectNumber = effectCol
+        var effect = "[EffectRack1_EffectUnit"+vDeckNo+"_Effect"+effectNumber+"]"
+        engine.setValue(effect, "enabled", value)
+        midi.sendShortMsg(0x97 + 2 * d, control, value);
+    }
+};
+
+DDJ200.padButtonClicked = function(channel, control, value, status, group) {
+    if (DDJ200.padModes[DDJ200.padModeIndex] === 'hotcue') {
+        DDJ200.hotcueNActivate(channel, control, value, status, group)
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'loop') {
+        DDJ200.repeatNActive(channel, control, value, status, group)
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'effects') {
+        DDJ200.effectNActive(channel, control, value, status, group)
+    }
+};
+
+DDJ200.padShiftButtonClicked = function(channel, control, value, status, group) {
+    if (DDJ200.padModes[DDJ200.padModeIndex] === 'hotcue') {
+        DDJ200.hotcueNClear(channel, control, value, status, group)
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'loop') {
+        DDJ200.rollRepeatN(channel, control, value, status, group)
+    }
+};
+
 DDJ200.pfl = function(channel, control, value, status, group) {
     if (value) { // only if button pressed, not releases, i.e. value === 0
         var deckNo = script.deckFromGroup(group);
@@ -348,31 +445,57 @@ DDJ200.switchLEDs = function(vDeckNo) {
     // set LEDs of controller deck 1 or 2 according to virtual deck
     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
     var vgroup = "[Channel" + vDeckNo + "]";
-    DDJ200.switchPlayLED(d, engine.getValue(vgroup, "play"));
+    midi.sendShortMsg(0x90 + d, 0x0B, 0x7F * engine.getValue(vgroup, "play"));
     midi.sendShortMsg(0x90 + d, 0x0C, 0x7F *
                       (engine.getValue(vgroup, "cue_point") !== -1));
-    DDJ200.switchSyncLED(d, engine.getValue(vgroup, "sync_enabled"));
+    midi.sendShortMsg(0x90 + d, 0x58, 0x7F * engine.getValue(vgroup,
+        "sync_enabled"));
     if (!DDJ200.fourDeckMode) {
         midi.sendShortMsg(0x90 + d, 0x54,
             0x7F * engine.getValue(vgroup, "pfl"));
     }
 
-    for (var i = 1; i <= 8; i++) {
-        var isButtonEnabled = engine.getValue(vgroup, "hotcue_" + i + "_enabled");
-        DDJ200.switchPadLED(d, i, isButtonEnabled);
+    DDJ200.switchPadLEDs(vDeckNo);
+};
+
+DDJ200.switchPadLEDs = function(vDeckNo) {
+    if (DDJ200.padModes[DDJ200.padModeIndex] === 'hotcue') {
+        DDJ200.switchHotcueLEDs(vDeckNo);
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'loop') {
+        DDJ200.switchLoopLEDs(vDeckNo);
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'effects') {
+        DDJ200.switchOffAllPadLEDs(vDeckNo);
     }
 };
 
-DDJ200.switchPlayLED = function(deck, enabled) {
-    midi.sendShortMsg(0x90 + deck, 0x0B, 0x7F * enabled);
+DDJ200.switchOffAllPadLEDs = function(vDeckNo) {
+    var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
+    for (var i = 0; i < 8; i++) {
+        midi.sendShortMsg(0x97 + 2 * d, i, 0);
+    }
 };
 
-DDJ200.switchSyncLED = function(deck, enabled) {
-    midi.sendShortMsg(0x90 + deck, 0x58, 0x7F * enabled);
+DDJ200.switchLoopLEDs = function(vDeckNo) {
+    var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
+    var vgroup = "[Channel" + vDeckNo + "]";
+    var currentBeatLoopSize = engine.getValue(vgroup, "beatloop_size");
+    var isBeatlooprollActivate = engine.getValue(vgroup, "beatlooproll_activate");
+    var isBeatloopActivate = engine.getValue(vgroup, "beatloop_activate");
+    var isAnyLoopActive = isBeatlooprollActivate || isBeatloopActivate;
+    for (var i = 0; i < 8; i++) {
+        var loopSize = getLoopSizeByIndex(i);
+        var loopSizeActive = isAnyLoopActive && currentBeatLoopSize === loopSize;
+        midi.sendShortMsg(0x97 + 2 * d, i, 0x7F * loopSizeActive);
+    }
 };
 
-DDJ200.switchPadLED = function(deck, pad, enabled) {
-    midi.sendShortMsg(0x97 + 2 * deck, pad - 1, 0x7F * enabled);
+DDJ200.switchHotcueLEDs = function(vDeckNo) {
+    var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
+    var vgroup = "[Channel" + vDeckNo + "]";
+    for (var i = 1; i <= 8; i++) {
+        var hotcueEnabled = engine.getValue(vgroup, "hotcue_" + i + "_enabled");
+        midi.sendShortMsg(0x97 + 2 * d, i - 1, 0x7F * hotcueEnabled);
+    }
 };
 
 DDJ200.toggleDeck = function(channel, control, value, status, group) {
@@ -404,3 +527,10 @@ DDJ200.toggleDeck = function(channel, control, value, status, group) {
         }
     }
 };
+
+
+// Helper function
+
+function getLoopSizeByIndex(i) {
+    return (Math.pow(2, i) * 0.25);
+}
