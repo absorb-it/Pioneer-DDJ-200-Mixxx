@@ -9,7 +9,7 @@
     </info>
     <controller id="DDJ-200">
         <scriptfiles>
-            <file functionprefix="DDJ200" filename="Pioneer-DDJ-200-scripts.js"/>
+            <file functionprefix="DDJ200" filename="Pioneer-DDJ-200-Alternative-scripts.js"/>
         </scriptfiles>
         <controls>
             <control>
