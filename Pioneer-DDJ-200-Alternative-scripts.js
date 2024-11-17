@@ -269,9 +269,11 @@ DDJ200.toggleFourDeckMode = function(channel, control, value) {
 };
 
 DDJ200.play = function(channel, control, value, status, group) {
+    DDJ200.debug && print("DDJ200.play: value=" + value);
     if (value) { // only if button pressed, not releases, i.e. value === 0
         var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
         var vgroup = "[Channel" + vDeckNo + "]";
+        DDJ200.debug && print("DDJ200.play: DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
         var playing = engine.getValue(vgroup, "play");
         engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
         if (engine.getValue(vgroup, "play") === playing) {
@@ -359,6 +361,7 @@ DDJ200.super1 = function(channel, control, value, status, group) {
 DDJ200.cueDefault = function(channel, control, value, status, group) {
     var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
     var vgroup = "[Channel" + vDeckNo + "]";
+    DDJ200.debug && print("DDJ200.cueDefault: DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
     if (value) { // if button pressed, i.e. value === 0
         DDJ200.cuePlay[vDeckNo]++;
         if (!DDJ200.vDeck[vDeckNo]["jogEnabled"]) {  // if jog top is touched
@@ -396,6 +399,7 @@ DDJ200.hotcueNActivate = function(channel, control, value, status, group) {
     var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
     var vgroup = "[Channel" + vDeckNo + "]";
     var hotcue = "hotcue_" + (control + 1);
+    DDJ200.debug && print("DDJ200.hotcueNActivate: DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
     if (value) { // if button pressed, i.e. value === 0
         if (engine.getValue(vgroup, hotcue + "_enabled"))
             DDJ200.cuePlay[vDeckNo]++;
