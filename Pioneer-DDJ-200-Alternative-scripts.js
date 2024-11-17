@@ -1,4 +1,5 @@
 var DDJ200 = {
+    debug: true,
     fourDeckMode: false,
     vDeckNo: [0, 1, 2],
     vDeck: {},
@@ -21,7 +22,6 @@ DDJ200.init = function() {
             rateMSB: 0,
             jogEnabled: true,
         };
-
         var vgroup = "[Channel" + i + "]";
 
         // run updateDeckLeds after every track load to set LEDs accordingly
@@ -31,6 +31,11 @@ DDJ200.init = function() {
 
         // run updateDeckLeds after play/pause track to set LEDs accordingly
         engine.makeConnection(vgroup, "play", function(ch, vgroup) {
+            if (!ch) {
+                var vDeckNo = script.deckFromGroup(vgroup);
+                DDJ200.debug && print("engine play connection: function(ch, vgroup)=function(" + ch + ", " + vgroup +")  DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
+                DDJ200.realPlay[vDeckNo] = 0;
+            }
             DDJ200.updateDeckLeds(vgroup);
         });
 
@@ -272,6 +277,10 @@ DDJ200.play = function(channel, control, value, status, group) {
         if (engine.getValue(vgroup, "play") === playing) {
             engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
         }
+        if (DDJ200.cuePlay[vDeckNo]) {
+            var hotcue = "hotcue_" + (control + 1);
+            engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
+        }
         // midi.sendShortMsg(status, 0x0B, engine.getValue(vgroup, "play") ? 0x7F : 0);
         DDJ200.realPlay[vDeckNo] =  ! DDJ200.realPlay[vDeckNo];
         DDJ200.updatePlayModeLed(group);
@@ -388,7 +397,8 @@ DDJ200.hotcueNActivate = function(channel, control, value, status, group) {
     var vgroup = "[Channel" + vDeckNo + "]";
     var hotcue = "hotcue_" + (control + 1);
     if (value) { // if button pressed, i.e. value === 0
-        DDJ200.cuePlay[vDeckNo]++;
+        if (engine.getValue(vgroup, hotcue + "_enabled"))
+            DDJ200.cuePlay[vDeckNo]++;
         engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
         engine.setValue(vgroup, hotcue + "_activate", true);
         midi.sendShortMsg(status, control,
