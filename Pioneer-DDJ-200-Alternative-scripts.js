@@ -31,6 +31,7 @@ DDJ200.init = function() {
 
         // run updateDeckLeds after play/pause track to set LEDs accordingly
         engine.makeConnection(vgroup, "play", function(ch, vgroup) {
+            DDJ200.debug && print("engine play connection: function(ch, vgroup)=function(" + ch + ", " + vgroup +")");
             if (!ch) {
                 var vDeckNo = script.deckFromGroup(vgroup);
                 DDJ200.debug && print("engine play connection: function(ch, vgroup)=function(" + ch + ", " + vgroup +")  DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
@@ -274,6 +275,7 @@ DDJ200.play = function(channel, control, value, status, group) {
         var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
         var vgroup = "[Channel" + vDeckNo + "]";
         DDJ200.debug && print("DDJ200.play: DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
+        DDJ200.debug && print("DDJ200.play: engine.getValue(" + vgroup + ", 'play')= " + engine.getValue(vgroup, "play") + " engine.getValue(" + vgroup + ", 'play_latched')=" + engine.getValue(vgroup, "play_latched"));
         var playing = engine.getValue(vgroup, "play");
         engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
         if (engine.getValue(vgroup, "play") === playing) {
