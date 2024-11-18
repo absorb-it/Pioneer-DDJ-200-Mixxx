@@ -486,7 +486,7 @@ DDJ200.beatjumpNActive = function(channel, control, value, status, group) {     
         var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
         var vgroup = "[Channel" + vDeckNo + "]";
         engine.setValue(vgroup, "beatjump_size", Math.pow(2, control+2));
-        if (DDJ200.shiftPressed["left"]) {
+        if (DDJ200.shiftPressed["left"] || DDJ200.shiftPressed["right"]) {
             engine.setValue(vgroup, "beatjump_backward", true);
         } else {
             engine.setValue(vgroup, "beatjump_forward", true);
