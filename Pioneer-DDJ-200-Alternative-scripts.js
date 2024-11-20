@@ -281,10 +281,10 @@ DDJ200.play = function(channel, control, value, status, group) {
         if (engine.getValue(vgroup, "play") === playing) {
             engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
         }
-        if (DDJ200.cuePlay[vDeckNo]) {
-            var hotcue = "hotcue_" + (control + 1);
-            engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
-        }
+        // if (DDJ200.cuePlay[vDeckNo]) {
+        //     var hotcue = "hotcue_" + (control + 1);
+        //     engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
+        // }
         // midi.sendShortMsg(status, 0x0B, engine.getValue(vgroup, "play") ? 0x7F : 0);
         DDJ200.realPlay[vDeckNo] =  ! DDJ200.realPlay[vDeckNo];
         DDJ200.updatePlayModeLed(group);
