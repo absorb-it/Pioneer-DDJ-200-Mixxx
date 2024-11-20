@@ -35,6 +35,7 @@ DDJ200.init = function() {
             if (!ch) {
                 var vDeckNo = script.deckFromGroup(vgroup);
                 DDJ200.debug && print("engine play connection: function(ch, vgroup)=function(" + ch + ", " + vgroup +")  DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
+                DDJ200.debug && print("DDJ200.play: set DDJ200.realPlay[" + vDeckNo + "] to 0")
                 DDJ200.realPlay[vDeckNo] = 0;
             }
             DDJ200.updateDeckLeds(vgroup);
@@ -79,6 +80,7 @@ DDJ200.switchAllChanelsLEDs = function() {
 };
 
 DDJ200.updatePlayModeLed = function(group) {
+    DDJ200.debug && print("updatePlayModeLed");
     var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
     var vgroup = "[Channel" + vDeckNo + "]";
     if (DDJ200.realPlay[vDeckNo]) {
@@ -102,6 +104,7 @@ DDJ200.updatePlayModeLed = function(group) {
         }
         midi.sendShortMsg(0x90 + script.deckFromGroup(group) - 1, 0x0B, 0);
     }
+    DDJ200.debug && print("updatePlayModeLed done");
 };
 
 DDJ200.updatePadModeLed = function() {
@@ -286,6 +289,7 @@ DDJ200.play = function(channel, control, value, status, group) {
         //     engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
         // }
         // midi.sendShortMsg(status, 0x0B, engine.getValue(vgroup, "play") ? 0x7F : 0);
+        DDJ200.debug && print("DDJ200.play: toggle DDJ200.realPlay[" + vDeckNo + "]")
         DDJ200.realPlay[vDeckNo] =  ! DDJ200.realPlay[vDeckNo];
         DDJ200.updatePlayModeLed(group);
     }
