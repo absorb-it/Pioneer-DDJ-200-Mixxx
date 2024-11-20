@@ -403,10 +403,13 @@ DDJ200.hotcueNActivate = function(channel, control, value, status, group) {
     var hotcue = "hotcue_" + (control + 1);
     DDJ200.debug && print("DDJ200.hotcueNActivate: DDJ200.realPlay[" + vDeckNo + "]=" + DDJ200.realPlay[vDeckNo] + " DDJ200.cuePlay[" + vDeckNo + "]=" + DDJ200.cuePlay[vDeckNo]);
     if (value) { // if button pressed, i.e. value === 0
-        if (engine.getValue(vgroup, hotcue + "_enabled"))
+        if (engine.getValue(vgroup, hotcue + "_status"))
             DDJ200.cuePlay[vDeckNo]++;
-        engine.setValue(vgroup, hotcue + "_activate", false); // else hotcue might not start playing
-        engine.setValue(vgroup, hotcue + "_activate", true);
+
+        if (engine.getValue(vgroup, hotcue + "_status") == 2)
+            engine.setValue(vgroup, hotcue + "_goto", true); // else hotcue might not start playing
+        else
+            engine.setValue(vgroup, hotcue + "_activate", true);
         midi.sendShortMsg(status, control,
             0x7F * engine.getValue(vgroup, hotcue + "_enabled"));
         DDJ200.updatePlayModeLed(group); // set play LED
