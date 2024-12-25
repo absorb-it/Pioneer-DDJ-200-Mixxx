@@ -283,6 +283,7 @@ DDJ200.play = function(channel, control, value, status, group) {
         engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
         if (engine.getValue(vgroup, "play") === playing) {
             engine.setValue(vgroup, "play", ! playing || DDJ200.cuePlay[vDeckNo]);
+            engine.trigger(vgroup, "play_indicator");
         }
         // if (DDJ200.cuePlay[vDeckNo]) {
         //     var hotcue = "hotcue_" + (control + 1);
@@ -564,8 +565,17 @@ DDJ200.switchPadLEDs = function(vDeckNo) {
         DDJ200.switchLoopLEDs(vDeckNo);
     } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'effects') {
         DDJ200.switchOffAllPadLEDs(vDeckNo);
+    } else if (DDJ200.padModes[DDJ200.padModeIndex] === 'beatjump') {
+        DDJ200.switchOffAllPadLEDs(vDeckNo);
     }
 };
+
+// DDJ200.switchOnAllPadLEDs = function(vDeckNo) {
+//     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
+//     for (var i = 0; i < 8; i++) {
+//         midi.sendShortMsg(0x97 + 2 * d, i, 0x7F);
+//     }
+// };
 
 DDJ200.switchOffAllPadLEDs = function(vDeckNo) {
     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
@@ -578,12 +588,13 @@ DDJ200.switchLoopLEDs = function(vDeckNo) {
     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
     var vgroup = "[Channel" + vDeckNo + "]";
     var currentBeatLoopSize = engine.getValue(vgroup, "beatloop_size");
-    var isBeatlooprollActivate = engine.getValue(vgroup, "beatlooproll_activate");
-    var isBeatloopActivate = engine.getValue(vgroup, "beatloop_activate");
-    var isAnyLoopActive = isBeatlooprollActivate || isBeatloopActivate;
+    var isAnyLoopActive = engine.getValue(vgroup, "loop_enabled");
     for (var i = 0; i < 8; i++) {
         var loopSize = getLoopSizeByIndex(i);
-        var loopSizeActive = isAnyLoopActive && currentBeatLoopSize === loopSize;
+
+        DDJ200.debug && print("DDJ200.switchLoopLEDs: loopSize=" + loopSize + " currentBeatLoopSize=" + currentBeatLoopSize + " isAnyLoopActive=" + isAnyLoopActive);
+
+        var loopSizeActive = isAnyLoopActive && (currentBeatLoopSize === loopSize);
         midi.sendShortMsg(0x97 + 2 * d, i, 0x7F * loopSizeActive);
     }
 };
