@@ -445,37 +445,38 @@ DDJ200.hotcueNClear = function(channel, control, value, status, group) {
 DDJ200.repeatNActive =  function(channel, control, value, status, group) {
     if (value) { // only if button pressed, not releases, i.e. value === 0
         var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
+        var d = (vDeckNo % 2) ? 0 : 1;
         var vgroup = "[Channel" + vDeckNo + "]";
         var loopSize = getLoopSizeByIndex(control);
-        var isBeatlooprollActivate = engine.getValue(vgroup, "beatlooproll_activate");
-        var currentBeatLoopSize = engine.getValue(vgroup, "beatloop_size");
+        var loopEnabled = engine.getValue(vgroup, "loop_enabled");
+        var matchingLoopSize = (engine.getValue(vgroup, "beatloop_size") === loopSize);
         
-        if (currentBeatLoopSize === loopSize) {
-            engine.setValue(vgroup, "beatloop_size", 0);
-            engine.setValue(vgroup, "beatlooproll_activate", false);
-            engine.setValue(vgroup, "beatloop_activate", false);
-        } else {
-            engine.setValue(vgroup, "beatloop_size", loopSize);
-            if (!isBeatlooprollActivate) {
-                engine.setValue(vgroup, "beatloop_activate", true);
-            }
+        engine.setValue(vgroup, "beatloop_size", loopSize);
+        if (matchingLoopSize || !loopEnabled) {
+            engine.setValue(vgroup, "beatloop_activate", true);
         }
 
-        DDJ200.switchPadLEDs(vDeckNo)
+        DDJ200.switchOffAllPadLEDs(vDeckNo);
+        midi.sendShortMsg(0x97 + 2 * d, control, 0x7F * (!matchingLoopSize || !loopEnabled));
     }
 };
 
 DDJ200.rollRepeatN = function(channel, control, value, status, group) {
     if (value) { // only if button pressed, not releases, i.e. value === 0
         var vDeckNo = DDJ200.vDeckNo[script.deckFromGroup(group)];
+        var d = (vDeckNo % 2) ? 0 : 1;
         var vgroup = "[Channel" + vDeckNo + "]";
-        var isBeatloopActivate = engine.getValue(vgroup, "beatloop_activate");
-        if (!isBeatloopActivate) {
-            var loopSize = getLoopSizeByIndex(control);
-            engine.setValue(vgroup, "beatloop_size", loopSize);
+        var loopSize = getLoopSizeByIndex(control);
+        var loopEnabled = engine.getValue(vgroup, "loop_enabled");
+        var matchingLoopSize = (engine.getValue(vgroup, "beatloop_size") === loopSize);
+
+        engine.setValue(vgroup, "beatloop_size", loopSize);
+        if (matchingLoopSize || !loopEnabled) {
             engine.setValue(vgroup, "beatlooproll_activate", true);
-            DDJ200.switchPadLEDs(vDeckNo);
         }
+
+        DDJ200.switchOffAllPadLEDs(vDeckNo);
+        midi.sendShortMsg(0x97 + 2 * d, control, 0x7F * (!matchingLoopSize || !loopEnabled));
     }
 };
 
@@ -571,13 +572,6 @@ DDJ200.switchPadLEDs = function(vDeckNo) {
     }
 };
 
-// DDJ200.switchOnAllPadLEDs = function(vDeckNo) {
-//     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
-//     for (var i = 0; i < 8; i++) {
-//         midi.sendShortMsg(0x97 + 2 * d, i, 0x7F);
-//     }
-// };
-
 DDJ200.switchOffAllPadLEDs = function(vDeckNo) {
     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
     for (var i = 0; i < 8; i++) {
@@ -592,8 +586,6 @@ DDJ200.switchLoopLEDs = function(vDeckNo) {
     var isAnyLoopActive = engine.getValue(vgroup, "loop_enabled");
     for (var i = 0; i < 8; i++) {
         var loopSize = getLoopSizeByIndex(i);
-
-        DDJ200.debug && print("DDJ200.switchLoopLEDs: loopSize=" + loopSize + " currentBeatLoopSize=" + currentBeatLoopSize + " isAnyLoopActive=" + isAnyLoopActive);
 
         var loopSizeActive = isAnyLoopActive && (currentBeatLoopSize === loopSize);
         midi.sendShortMsg(0x97 + 2 * d, i, 0x7F * loopSizeActive);
