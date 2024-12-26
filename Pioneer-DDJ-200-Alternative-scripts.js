@@ -9,7 +9,8 @@ var DDJ200 = {
     padModes: ['hotcue', 'loop', 'effects', 'beatjump'],
     realPlay:  [ false, false, false, false ],
     cuePlay:  [ 0, 0, 0, 0 ],
-    playModeBlinkTimer: [ 0, 0, 0, 0 ]
+    playModeBlinkTimer: [ 0, 0, 0, 0 ],
+    padModeBlinkTimer: undefined
 };
 
 DDJ200.init = function() {
