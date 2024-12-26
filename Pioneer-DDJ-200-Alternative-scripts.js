@@ -68,7 +68,23 @@ DDJ200.init = function() {
 
 DDJ200.changePadMode = function(channel, control, value) {
     if (value) { // only if button pressed, not releases, i.e. value === 0
-        DDJ200.padModeIndex = (DDJ200.padModeIndex + 1) % DDJ200.padModes.length;
+        if (DDJ200.padModeIndex == (DDJ200.padModes.length - 1))
+            DDJ200.padModeIndex = 0;
+        else {
+            DDJ200.padModeIndex = (DDJ200.padModeIndex + 1) % (DDJ200.padModes.length - 1);
+        }
+        DDJ200.updatePadModeLed();
+        DDJ200.switchAllChanelsLEDs();
+    }
+};
+
+DDJ200.changePadModeToBeatjump = function(channel, control, value) {
+    if (value) { // only if button pressed, not releases, i.e. value === 0
+        if (DDJ200.padModeIndex == (DDJ200.padModes.length - 1))
+            DDJ200.padModeIndex = 0;
+        else {
+            DDJ200.padModeIndex = DDJ200.padModes.length - 1;
+        }
         DDJ200.updatePadModeLed();
         DDJ200.switchAllChanelsLEDs();
     }
@@ -115,8 +131,14 @@ DDJ200.updatePadModeLed = function() {
     }
     if (DDJ200.padModeIndex === 3) {
         var tunedOn = true;
-        DDJ200.padModeBlinkTimer = engine.beginTimer(75, function () {
-            midi.sendShortMsg(0x96, 0x59, 0x7F * (tunedOn = !tunedOn));
+        DDJ200.padModeBlinkTimer = engine.beginTimer(250, function () {
+            tunedOn = !tunedOn;
+            midi.sendShortMsg(0x96, 0x59, 0x7F * tunedOn);
+            for (var i = 0; i < 8; i++) {
+                midi.sendShortMsg(0x97, i, 0x7F * tunedOn);
+                midi.sendShortMsg(0x99, i, 0x7F * tunedOn);
+            }
+
         });
     } else if (DDJ200.padModeIndex === 2) {
         var tunedOn = true;

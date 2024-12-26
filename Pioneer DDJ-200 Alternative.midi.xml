@@ -171,6 +171,16 @@
                     <script-binding/>
                 </options>
             </control>
+            <control>
+                <group>[AutoDJ]</group>
+                <key>DDJ200.changePadModeToBeatjump</key>
+                <description>Change Pad mode</description>
+                <status>0x96</status>
+                <midino>0x5A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
             <!--<control>
                 <group>[AutoDJ]</group>
                 <key>fade_now</key>
