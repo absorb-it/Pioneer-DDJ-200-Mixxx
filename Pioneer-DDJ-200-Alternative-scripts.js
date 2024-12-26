@@ -618,7 +618,7 @@ DDJ200.switchHotcueLEDs = function(vDeckNo) {
     var d = (vDeckNo % 2) ? 0 : 1;           // d = deckNo - 1
     var vgroup = "[Channel" + vDeckNo + "]";
     for (var i = 1; i <= 8; i++) {
-        var hotcueEnabled = engine.getValue(vgroup, "hotcue_" + i + "_enabled");
+        var hotcueEnabled = (engine.getValue(vgroup, "hotcue_" + i + "_enabled") != 0);
         midi.sendShortMsg(0x97 + 2 * d, i - 1, 0x7F * hotcueEnabled);
     }
 };
