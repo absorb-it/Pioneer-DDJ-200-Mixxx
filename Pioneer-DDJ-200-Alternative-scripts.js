@@ -387,6 +387,8 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
                 } else if (control > 3) {
                     var sampler = "[Sampler" + (control - 3 + (this.deckFromGroup(this.group)-1) * 4) + "]";
                     this.connections[0] = engine.makeConnection(sampler, "play", this.output.bind(this));
+                } else {
+                    this.connections[0] = undefined;
                 }
             },
             outKey_effect: undefined,
