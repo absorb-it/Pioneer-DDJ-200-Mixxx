@@ -471,18 +471,3 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
 };
 
 DDJ200.Deck.prototype = new components.Deck();
-
-DDJ200.toggleFourDeckMode = function(channel, control, value) {
-    if (value) { // only if button pressed
-        DDJ200.fourDeckMode = !DDJ200.fourDeckMode;
-        if (DDJ200.fourDeckMode) {
-            midi.sendShortMsg(0x90, 0x54, 0x00);
-            midi.sendShortMsg(0x91, 0x54, 0x00);
-        } else {
-            DDJ200.vDeckNo[1] = 1;
-            DDJ200.vDeckNo[2] = 2;
-            DDJ200.switchLEDs(1); // set LEDs of controller deck
-            DDJ200.switchLEDs(2); // set LEDs of controller deck
-        }
-    }
-};
