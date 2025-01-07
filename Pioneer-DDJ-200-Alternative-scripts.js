@@ -341,6 +341,7 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
                     engine.setValue(this.group, "beatloop_size", loopSize);
                     if (matchingLoopSize || !loopEnabled) {
                         engine.setValue(this.group, "beatloop_activate", true);
+                        this.send(this.outValueScale(value));
                     }
                 }
             },
