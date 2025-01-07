@@ -22,15 +22,15 @@ To add all these extra functionality, it was required to mis-use some of the exi
 
 | Key              | Effect                                                          | Feedback                                       |
 | ---------------- | --------------------------------------------------------------- | ---------------------------------------------- |
-| Shift + Master   | switch between 2Deck and 4Deck mode                             | check Computer Interface                       |
+| Shift + Master   | switch between 2Deck and 4Deck mode                             |                                                |
 | Shift + Beatsync | 2Deck mode: Change RPM Range<br/>4Deck mode: Change active Deck | 4Deck mode: Blinking on alternate Deck control |
 
 #### Select / Load Tracks
 
-| Key                                           | Effect                                 | Feedback                 |
-| --------------------------------------------- | -------------------------------------- | ------------------------ |
-| Left Shift + Rotate any Jogwheel              | Scroll trough library                  | check Computer Interface |
-| Shift + Left/Right Headphone Cue Button (PFL) | Load Selceted Track to Left/Right Deck | check Computer Interface |
+| Key                                           | Effect                                 | 
+| --------------------------------------------- | -------------------------------------- |
+| Left Shift + Rotate any Jogwheel              | Scroll trough library                  |
+| Shift + Left/Right Headphone Cue Button (PFL) | Load Selected Track to Left/Right Deck |
 
 #### Pad Button Options
 
@@ -40,13 +40,19 @@ To add all these extra functionality, it was required to mis-use some of the exi
 |                                                   | Hotcue Mode                   | Transition FX off                   |
 |                                                   | Loop Mode                     | Transition FX on                    |
 |                                                   | Effect Mode                   | Transition FX blinking              |
-| Shift + Transition FX                             | Beatjump                      | All Pads and Transition FX blinking |
+| Shift + Transition FX                             | Beatjump Mode                 | All Pads and Transition FX blinking |
+| | | |
 | Pad in Hotcue Mode                                | Set or Preview/Play Hotcue    | PAD is on when Hotcue set           |
 | Shift + Pad in Hotcue Mode                        | Clear Hotcue                  | PAD is off                          |
+| | | |
 | PAD 1 to 8 in Loop Mode                           | Set or Leave Beatloop         | PAD is on when Loop is active       |
 | Shift + PAD 1 to 8 in Loop Mode                   | Set or Leave Beatlooproll     | PAD is on when Loop is active       |
+| | | |
 | (Shift +) PAD 1 to 4 of Left Deck in Effect Mode  | Play/Stop Sampler 1 to 4      | PAD is on when Sampler is playing   |
 | (Shift +) PAD 1 to 4 of Right Deck in Effect Mode | Play/Stop Sampler 5 to 8      | PAD is on when Sampler is playing   |
 | (Shift +) PAD 5 to 7 of Left Deck in Effect Mode  | Activate Effect 1 to 3 of FX1 | PAD is on when Effect is active     |
 | (Shift +) PAD 5 to 7 of Right Deck in Effect Mode | Activate Effect 1 to 3 of FX2 | PAD is on when Effect is active     |
-| (Shift +) PAD 8 in Effect Mode                    | bpm tap- Button               |                                     |
+| (Shift +) PAD 8 in Effect Mode                    | BPM Tap- Button               |                                     |
+| | | |
+| PAD 1 to 8 in Beatjump Mode                       | Jump Forward                  |                                     |
+| Shift + PAD 1 to 8 in Beatjump Mode               | Jump Backwards                |                                     |
