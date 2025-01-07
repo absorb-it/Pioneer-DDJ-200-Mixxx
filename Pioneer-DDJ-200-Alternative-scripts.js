@@ -241,8 +241,19 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
         },
         shiftedInput: function(channel, control, value, status, _g) {
             if (value) {
-                engine.setValue(this.group, "quantize",
-                        engine.getValue(this.group, "quantize")?0:1);
+                if (engine.getValue("[Skin]", "show_4decks")) {
+                    theDeck.toggle();
+                    if (theDeck.currentDeck == "[Channel3]" || theDeck.currentDeck == "[Channel4]" ) {
+                        this.blinkConnection = engine.makeConnection("[App]", "indicator_250ms", function(value, _group, _control) {
+                            midi.sendShortMsg(0x8F + midiChannel, 0x58, 0x7F * value);
+                        });
+                    } else if (this.blinkConnection) {
+                        this.blinkConnection.disconnect();
+                    }
+                } else {
+                    currentRange = engine.getValue(this.group, "rateRange");
+                    engine.setValue(this.group, "rateRange", (currentRange>0.9)?0.1:currentRange+0.1);
+                }
             }
         }
     });
