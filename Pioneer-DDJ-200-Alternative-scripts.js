@@ -87,9 +87,9 @@ DDJ200.LEDsOff = function() {                         // turn off LED buttons:
 
 DDJ200.padModes = [ "hotcue", "loop", "effect", "jump" ];
 DDJ200.padModeIndex = 0;
-DDJ200.padModeBlinkTimer = undefined;
 DDJ200.transFxButton = new components.Button({
     midi: [0x96, 0x59],
+    blinkConnection: undefined,
     input: function(channel, control, value, status, _g) {
         if (value) { // only if button pressed
             if (DDJ200.padModeIndex == (DDJ200.padModes.length - 1))
@@ -115,9 +115,9 @@ DDJ200.transFxButton = new components.Button({
         }
     },
     output: function(value, _g, control) {
-        if (DDJ200.padModeBlinkTimer) {
-            engine.stopTimer(DDJ200.padModeBlinkTimer);
-            DDJ200.padModeBlinkTimer = undefined;
+        if (this.blinkConnection) {
+            this.blinkConnection.disconnect();
+            this.blinkConnection = undefined;
         }
         switch (DDJ200.padModes[DDJ200.padModeIndex]) {
             case "hotcue":
@@ -127,20 +127,17 @@ DDJ200.transFxButton = new components.Button({
                 this.send(this.outValueScale(1));
                 break;
             case "effect":
-                var tunedOn = true;
-                DDJ200.padModeBlinkTimer = engine.beginTimer(250, function () {
-                    midi.sendShortMsg(0x96, 0x59, 0x7F * (tunedOn = !tunedOn));
+                this.blinkConnection = engine.makeConnection("[App]", "indicator_250ms", function(value, _group, _control) {
+                    midi.sendShortMsg(0x96, 0x59, 0x7F * value);
                 });
                 break;
             case "jump":
-                var tunedOn = true;
-                DDJ200.padModeBlinkTimer = engine.beginTimer(250, function () {
-                    midi.sendShortMsg(0x96, 0x59, 0x7F * tunedOn);
+                this.blinkConnection = engine.makeConnection("[App]", "indicator_250ms", function(value, _group, _control) {
+                    midi.sendShortMsg(0x96, 0x59, 0x7F * value);
                     for (var i = 0; i < 8; i++) {
-                        midi.sendShortMsg(0x97, i, 0x7F * tunedOn);
-                        midi.sendShortMsg(0x99, i, 0x7F * tunedOn);
+                        midi.sendShortMsg(0x97, i, 0x7F * value);
+                        midi.sendShortMsg(0x99, i, 0x7F * value);
                     };
-                    tunedOn = !tunedOn;
                 });
                 break;
         }
