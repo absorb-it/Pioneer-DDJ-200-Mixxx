@@ -286,7 +286,6 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
                 this['input_shift_' + DDJ200.padModes[DDJ200.padModeIndex]](channel, control, value, status, _g);
             },
             output: function(value, _g, _control) {
-                console.log("pad output");
                 this['output_' + DDJ200.padModes[DDJ200.padModeIndex]](value, _g, _control);
             },
             midi_normal: [0x97 + (midiChannel - 1)*2, 0x00 + i],
@@ -306,7 +305,6 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
                 }
             },
             updateOutKey: function() {
-                console.log("update Outkey");
                 this.outKey = this['outKey_' + DDJ200.padModes[DDJ200.padModeIndex]];
                 this.disconnect();
                 this.connect();
@@ -323,7 +321,6 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
             },
             outKey_hotcue: 'hotcue_' + (i + 1) + '_status',
             output_hotcue: function(value, _g, _control) {
-                console.log("send output value=" + value + " midi=" + this.midi);
                 this.send(this.outValueScale(value));
             },
 
