@@ -368,16 +368,20 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
 
             /* ----------- PADs in Effect Mode ----------- */
             input_effect: function(channel, control, value, status, _g) {
-                if (control < 3) {
-                    var effect = "[EffectRack1_EffectUnit" + this.deckFromGroup(this.group) + "_Effect" + (control + 1) +"]";
-                    engine.setValue(effect, "enabled", value);
-                } else if (control > 3) {
-                    var sampler = "[Sampler" + (control - 3 + (this.deckFromGroup(this.group)-1)*4) + "]"
-                    console.log(sampler);
+                if (control < 4) {
+                    var sampler = "[Sampler" + (control + 1 +(this.deckFromGroup(this.group)-1)*4) + "]"
                     if (engine.getValue(sampler, "play"))
                         engine.setValue(sampler, "stop", value);
                     else
                         engine.setValue(sampler, "cue_gotoandplay", value);
+                } else if (control < 7) {
+                    var effect = "[EffectRack1_EffectUnit" + this.deckFromGroup(this.group) + "_Effect" + (control - 3) +"]";
+                    engine.setValue(effect, "enabled", value);
+                } else {
+                    if (value) {
+                        bpm.tapButton(this.deckFromGroup(this.group));
+                    }
+                    this.send(this.outValueScale(value));
                 }
             },
             input_shift_effect: function(channel, control, value, status, _g) {
@@ -389,12 +393,12 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
             },
             outKey_effect_connect: function() {
                 var control = this.number - 1;
-                if (control < 3) {
-                    var effect = "[EffectRack1_EffectUnit" + this.deckFromGroup(this.group) + "_Effect" + (control + 1) +"]";
-                    this.connections[0] = engine.makeConnection(effect, "enabled", this.output.bind(this));
-                } else if (control > 3) {
-                    var sampler = "[Sampler" + (control - 3 + (this.deckFromGroup(this.group)-1) * 4) + "]";
+                if (control < 4) {
+                    var sampler = "[Sampler" + (control + 1 + (this.deckFromGroup(this.group)-1) * 4) + "]";
                     this.connections[0] = engine.makeConnection(sampler, "play", this.output.bind(this));
+                } else if (control < 7) {
+                    var effect = "[EffectRack1_EffectUnit" + this.deckFromGroup(this.group) + "_Effect" + (control - 3) +"]";
+                    this.connections[0] = engine.makeConnection(effect, "enabled", this.output.bind(this));
                 } else {
                     this.connections[0] = undefined;
                 }
