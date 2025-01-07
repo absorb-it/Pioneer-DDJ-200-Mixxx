@@ -7,17 +7,11 @@ This is a new impĺementation of the Pioneer DJ-200 controller script for [mixxx
 Beside all standard features some special things have been taken over from the already existing DDJ-200 script or added:
 
 - 4 Deck control possible
-
 - Select and load tracks from within the controller
-
 - use pad buttons for
-  
   - hotcues (ok, standard)
-  
   - loops
-  
   - effects and samples
-  
   - beatjump
 
 ### Controller Usage and Indications
