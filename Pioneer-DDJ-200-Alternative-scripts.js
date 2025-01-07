@@ -441,13 +441,7 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
         type: components.Button.prototype.types.toggle,
         input: function(channel, control, value, status, _g) {
             if (value) { // only if button pressed
-                if (DDJ200.leftDeck.shiftPressed) {
-                    // left shift + pfl 1/2 does not toggle decks but loads track
-                    script.triggerControl(this.group, "LoadSelectedTrack", true);
-                }
-                else if (engine.getValue("[Skin]", "show_4decks")) {
-                    theDeck.toggle();
-                }
+                script.triggerControl(this.group, "LoadSelectedTrack", true);
             }
         }
     });
