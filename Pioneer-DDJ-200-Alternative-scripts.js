@@ -183,10 +183,6 @@ DDJ200.shiftButton = new components.Button({
 });
 
 DDJ200.Deck = function (deckNumbers, midiChannel) {
-    // Call the generic Deck constructor to setup the currentDeck and deckNumbers properties,
-    // using Function.prototype.call to assign the custom Deck being constructed
-    // to 'this' in the context of the generic components.Deck constructor
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call
     components.Deck.call(this, deckNumbers);
     var theDeck = this;
 
