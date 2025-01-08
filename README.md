@@ -83,6 +83,8 @@ change between differerent PAD modes with <code>Transition FX</code>
 | 4 | <code>SHIFT</code><code>HEADPHONE CUE 1</code>, <code>HEADPHONE CUE 1</code> | Toggle headphone pre-fader listening of left deck.
 | 4 | <code>SHIFT</code><code>HEADPHONE CUE 2</code>, <code>HEADPHONE CUE 2</code> | Toggle headphone pre-fader listening of right deck.
 | 5 | Channel faders                                         | Adjust the output level for each channel
+| 5 | <code>SHIFT</code>Channel faders                       | zero->notzero: "FADER Start", <code>PLAY</code><br />notzero->zero: "FADER Stop", <code>PAUSE</code> and set Cue<br /> |
 | 6 | <code>Transition FX</code> Button | Change <code>PAD</code> modes (Hotcue - Loop - Effect) / Return from Jump mode
 | 6 | <code>SHIFT</code><code>Transition FX</code> Button | Toggle beatjump <code>PAD</code> mode
-| 7 | crossfader | Fade between left and right Deck |
+| 7 | Crossfader | Fade between left and right Deck |
+| 7 | <code>SHIFT</code>Crossfader | zero->notzero: "FADER Start", <code>PLAY</code><br />notzero->zero: "FADER Stop", <code>PAUSE</code> and set Cue<br /> |
