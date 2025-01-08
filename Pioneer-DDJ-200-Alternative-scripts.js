@@ -264,6 +264,12 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
             this.inKey = 'reverse';
             this.midi = [0x8F + midiChannel, 0x47];
         },
+        input_faderStart: function(channel, control, value, status, _g) {
+            console.log("input_faderStart");
+            this.inKey = 'play';
+            this.input(channel, control, value, status, _g);
+            this.inKey = 'reverse';
+        },
         unshift: function() {
             this.inKey = 'play';
             this.midi = [0x8F + midiChannel, 0x0B];
@@ -275,6 +281,12 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
         shift: function() {
             this.inKey = 'cue_gotoandstop';
             this.midi = [0x8F + midiChannel, 0x48];
+        },
+        input_faderStop: function(channel, control, value, status, _g) {
+            this.inKey = 'cue_set';
+            this.input(channel, control, value, status, _g);
+            this.inKey = 'cue_gotoandstop';
+            this.input(channel, control, value, status, _g);
         },
         unshift: function() {
             this.inKey = 'cue_default';
