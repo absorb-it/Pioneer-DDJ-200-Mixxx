@@ -2,7 +2,7 @@
 <MixxxControllerPreset schemaVersion="1" mixxxVersion="2.0.0+">
     <info>
         <name>Pioneer DDJ-200 (Alternative)</name>
-        <author>Dan Giddins, Frank.Breitling at gmx.de, Geovanni Pacheco</author>
+        <author>Rene (mixxx at absorb.it), Dan Giddins, Frank.Breitling at gmx.de, Geovanni Pacheco</author>
         <description>2-deck USB and Bluetooth MIDI controller with support for 4-deck mode.</description>
         <forum>https://mixxx.discourse.group/t/pioneer-ddj-200-mapping/18259</forum>
         <manual>pioneer_ddj_200_alternative</manual>
