@@ -161,6 +161,12 @@ DDJ200.headMixButton = new components.Button({
             if (!engine.getValue("[Skin]", "show_4decks")) {
                 DDJ200.leftDeck.setCurrentDeck("[Channel1]");
                 DDJ200.rightDeck.setCurrentDeck("[Channel2]");
+                if (DDJ200.leftDeck.syncButton.blinkConnection) {
+                    DDJ200.leftDeck.syncButton.blinkConnection.disconnect();
+                }
+                if (DDJ200.rightDeck.syncButton.blinkConnection) {
+                    DDJ200.rightDeck.syncButton.blinkConnection.disconnect();
+                }
             }
         }
     }
