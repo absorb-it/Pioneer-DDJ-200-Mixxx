@@ -449,13 +449,18 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
     this.pads.forEach(function(e) { e.updateOutKey() });
 
     this.pflButton = new components.Button({
+        midi: [0x8F + midiChannel, 0x54],
         key: 'pfl',
         type: components.Button.prototype.types.toggle,
-        shift: function() {
-            this.midi = [0x8F + midiChannel, 0x68];
-        },
-        unshift: function() {
-            this.midi = [0x8F + midiChannel, 0x54];
+    });
+
+    this.toggleDeck = new components.Button({
+        midi: [0x8F + midiChannel, 0x68],
+        type: components.Button.prototype.types.toggle,
+        input: function(channel, control, value, status, _g) {
+            if (value) { // only if button pressed
+                script.triggerControl(this.group, "LoadSelectedTrack", true);
+            }
         }
     });
 
