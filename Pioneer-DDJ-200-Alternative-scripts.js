@@ -454,7 +454,7 @@ DDJ200.Deck = function (deckNumbers, midiChannel) {
         type: components.Button.prototype.types.toggle,
     });
 
-    this.toggleDeck = new components.Button({
+    this.loadTrack = new components.Button({
         midi: [0x8F + midiChannel, 0x68],
         type: components.Button.prototype.types.toggle,
         input: function(channel, control, value, status, _g) {
