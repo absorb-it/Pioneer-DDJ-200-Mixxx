@@ -88,29 +88,19 @@ DDJ200.LEDsOff = function() {                         // turn off LED buttons:
 DDJ200.padModes = [ "hotcue", "loop", "effect", "jump" ];
 DDJ200.padModeIndex = 0;
 DDJ200.transFxButton = new components.Button({
-    midi: [0x96, 0x59],
     blinkConnection: undefined,
     input: function(channel, control, value, status, _g) {
         if (value) { // only if button pressed
             if (DDJ200.padModeIndex == (DDJ200.padModes.length - 1))
                 DDJ200.padModeIndex = 0;
             else {
-                DDJ200.padModeIndex = (DDJ200.padModeIndex + 1) % (DDJ200.padModes.length - 1);
+                if (DDJ200.leftDeck.shiftPressed || DDJ200.rightDeck.shiftPressed)
+                    DDJ200.padModeIndex = DDJ200.padModes.length - 1;
+                else
+                    DDJ200.padModeIndex = (DDJ200.padModeIndex + 1) % (DDJ200.padModes.length - 1);
             }
             DDJ200.leftDeck.pads.forEach(function(e) { e.updateOutKey(); });
             DDJ200.rightDeck.pads.forEach(function(e) { e.updateOutKey(); });
-            this.output();
-        }
-    },
-    shiftedInput: function(channel, control, value, status, _g) {
-        if (value) { // only if button pressed
-            if (DDJ200.padModeIndex == (DDJ200.padModes.length - 1))
-                DDJ200.padModeIndex = 0;
-            else {
-                DDJ200.padModeIndex = DDJ200.padModes.length - 1;
-            }
-            DDJ200.leftDeck.pads.forEach(function(e) { e.updateOutKey() });
-            DDJ200.rightDeck.pads.forEach(function(e) { e.updateOutKey() });
             this.output();
         }
     },
@@ -121,23 +111,28 @@ DDJ200.transFxButton = new components.Button({
         }
         switch (DDJ200.padModes[DDJ200.padModeIndex]) {
             case "hotcue":
-                this.send(this.outValueScale(0));
+                midi.sendShortMsg(0x96, 0x59, 0x00);
+                midi.sendShortMsg(0x96, 0x5A, 0x00);
                 break;
             case "loop":
-                this.send(this.outValueScale(1));
+                midi.sendShortMsg(0x96, 0x59, 0x7F);
+                midi.sendShortMsg(0x96, 0x5A, 0x7F);
                 break;
             case "effect":
                 this.blinkConnection = engine.makeConnection("[App]", "indicator_250ms", function(value, _group, _control) {
                     midi.sendShortMsg(0x96, 0x59, 0x7F * value);
+                    midi.sendShortMsg(0x96, 0x5A, 0x7F * value);
                 });
                 break;
             case "jump":
                 this.blinkConnection = engine.makeConnection("[App]", "indicator_250ms", function(value, _group, _control) {
                     midi.sendShortMsg(0x96, 0x59, 0x7F * value);
-                    for (var i = 0; i < 8; i++) {
-                        midi.sendShortMsg(0x97, i, 0x7F * value);
-                        midi.sendShortMsg(0x99, i, 0x7F * value);
-                    };
+                    midi.sendShortMsg(0x96, 0x5A, 0x7F * value);
+                    for (var midiChannel = 0; midiChannel < 4; midiChannel++) {
+                        for (var i = 0; i < 8; i++) {
+                            midi.sendShortMsg(0x97 + midiChannel, i, 0x7F * value);
+                        };
+                    }
                 });
                 break;
         }
