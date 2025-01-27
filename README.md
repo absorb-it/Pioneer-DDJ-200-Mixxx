@@ -35,9 +35,9 @@ Just copy the *xml and *js files into the controller diretory under your mixxx p
 | ---- | ---- | ---- |
 | 1 | Jog Wheel (top)                               | Scratch (move play position) |
 | 1 | Jog Wheel (outer)                             | Pitch bend (nudge) |
-| 1 | <code>SHIFT_(right)</code> + Jog Wheel (top)  | Seek (move play position) without audio output |
-| 1 | <code>SHIFT (left)</code> + Jog Wheel (outer) | Move track selection in library |
-| 2 | <code>SHIFT</code> | Switch function of controls (see above for only difference between left and right <code>SHIFT</code> |
+| 1 | <code>RIGHT SHIFT</code> + Jog Wheel (top)  | Seek (move play position) without audio output (left or right Jog Wheel). Be aware of different behaviour of left and right <code>SHIFT</code>. |
+| 1 | <code>LEFT SHIFT</code> + Jog Wheel (outer) | Move track selection in library (left or right Jog Wheel). Be aware of different behaviour of left and right <code>SHIFT</code>. |
+| 2 | <code>SHIFT</code> | Switch function of controls (see above for only difference between left and right <code>SHIFT</code>) |
 | 3 | <code>PAD</code>, <code>SHIFT</code><code>PAD</code> 1 - 8 | see PAD modes section |
 | 4 | <code>CUE</code> | When playing, returns to the cue point and pauses. If stopped, sets a cue point at the current location. If stopped and at a cue point, plays from that point until released |
 | 4 | <code>SHIFT</code><code>CUE</code> | Return to cue point and stop |
