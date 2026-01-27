@@ -1,3 +1,5 @@
+This is the old implementation of the controller, you should use the files from https://github.com/absorb-it/mixxx/tree/pioneer_ddj-200/res/controllers instead ([Pioneer DDJ-200.midi.xml](https://github.com/absorb-it/mixxx/blob/pioneer_ddj-200/res/controllers/Pioneer%20DDJ-200.midi.xml) and [Pioneer-DDJ-200-scripts.js](https://github.com/absorb-it/mixxx/blob/pioneer_ddj-200/res/controllers/Pioneer-DDJ-200-scripts.js) ) these are the ones which are part of a pull request for this controller and development is going on there.
+
 # "Pioneer DDJ-200 Alternative" controller implementation for Mixxx
 
 This is a new impĺementation of the Pioneer DJ-200 controller script for [mixxx](https://github.com/mixxxdj/mixxx). At first I tried to fix some issue with the hotcue pads on the implemented controller script, but deeper I jumped into the code the more I liked to get some cleaner and more advanced funtionality. Especially the usage of [Components-JS](https://github.com/mixxxdj/mixxx/wiki/Components-JS) made everything much cleaner. Maybe, after a while of testing and some feedback I will ask to get his included in core mixxx code.
